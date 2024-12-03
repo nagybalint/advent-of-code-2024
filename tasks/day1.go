@@ -12,6 +12,59 @@ import (
 
 type Day1Task1 struct{}
 
+func (Day1Task1) CalculateAnswer() (string, error) {
+	input, err := utils.ReadFileFromRelative("resources/day1.txt")
+	if err != nil {
+		log.Println("Error reading input")
+		return "", err
+	}
+	locationsA, locationsB, err := getLocationIds(input)
+	if err != nil {
+		log.Println("Cannot parse location ids")
+		return "", err
+	}
+
+	sort.Ints(locationsA)
+	sort.Ints(locationsB)
+
+	distance := getTotalDistance(locationsA, locationsB)
+
+	return strconv.Itoa(distance), nil
+}
+
+type Day1Task2 struct{}
+
+func (Day1Task2) CalculateAnswer() (string, error) {
+	input, err := utils.ReadFileFromRelative("resources/day1.txt")
+	if err != nil {
+		log.Println("Error reading input")
+		return "", err
+	}
+	locationsA, locationsB, err := getLocationIds(input)
+	if err != nil {
+		log.Println("Cannot parse location ids")
+		return "", err
+	}
+	rightOccurrences := getOccurences(locationsB)
+	similarity := getSimilarity(locationsA, rightOccurrences)
+	return strconv.Itoa(similarity), nil
+}
+
+func getSimilarity(leftLocations []int, rightOccurrences map[int]int) (similarity int) {
+	for _, leftLocation := range leftLocations {
+		similarity += leftLocation * rightOccurrences[leftLocation]
+	}
+	return
+}
+
+func getOccurences(locations []int) map[int]int {
+	occurrences := make(map[int]int)
+	for _, locationId := range locations {
+		occurrences[locationId]++
+	}
+	return occurrences
+}
+
 func parseAndAppendLocationId(list []int, id string) ([]int, error) {
 	locationId1, err := strconv.Atoi(id)
 	if err != nil {
@@ -74,25 +127,4 @@ func absInt(x, y int) int {
 	} else {
 		return y - x
 	}
-}
-
-func (Day1Task1) CalculateAnswer() (string, error) {
-	input, err := utils.ReadFileFromRelative("resources/day1task1.txt")
-	if err != nil {
-		log.Println("Error reading input")
-		return "", err
-	}
-	locationsA, locationsB, err := getLocationIds(input)
-	if err != nil {
-		log.Println("Cannot parse location ids")
-		return "", err
-	}
-
-	sort.Ints(locationsA)
-	sort.Ints(locationsB)
-
-	distance := getTotalDistance(locationsA, locationsB)
-
-	return strconv.Itoa(distance), nil
-
 }
