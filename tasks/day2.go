@@ -9,6 +9,7 @@ import (
 )
 
 type Day2Task1 struct{}
+type Day2Task2 struct{}
 type Level int
 type Report []Level
 
@@ -27,7 +28,7 @@ func (Day2Task1) CalculateAnswer() (string, error) {
 
 	safeReports := 0
 	for _, r := range reports {
-		if isSafe(r) {
+		if isSafe(r, true) || isSafe(r, false) {
 			safeReports++
 		}
 	}
@@ -35,30 +36,86 @@ func (Day2Task1) CalculateAnswer() (string, error) {
 	return strconv.Itoa(safeReports), nil
 }
 
-func isSafe(report Report) bool {
-	var diffs []int
-	for _, w := range utils.SlidingWindow[Level](report, 2) {
-		if len(w) < 2 {
-			return true
-		}
-		diffs = append(diffs, int(w[1])-int(w[0]))
+func (Day2Task2) CalculateAnswer() (string, error) {
+	input, err := utils.ReadFileFromRelative("resources/day2.txt")
+	if err != nil {
+		log.Println("Error reading input")
+		return "", err
 	}
-	shouldIncrease := diffs[0] > 0
-	for _, d := range diffs {
-		if shouldIncrease {
-			if d < 0 {
-				return false
-			}
+
+	reports, err := getReports(input)
+	if err != nil {
+		log.Println("Cannot parse all reports", err)
+		return "", err
+	}
+
+	safeReports := 0
+	for _, r := range reports {
+		if len(r) < 2 {
+			safeReports++
+		} else if isSafeWithToleration(r, true, true) ||
+			isSafeWithToleration(r, false, true) ||
+			isSafeWithToleration(r[1:], true, false) ||
+			isSafeWithToleration(r[1:], false, false) {
+			safeReports++
+		}
+	}
+
+	return strconv.Itoa(safeReports), nil
+}
+
+func isSafeWithToleration(report Report, isIncreasing bool, isFailureTolerated bool) bool {
+	if len(report) == 1 {
+		return true
+	}
+	if len(report) == 2 {
+		if isFailureTolerated {
+			return true
 		} else {
-			if d > 0 {
-				return false
-			}
+			return isStepValid(report[0], report[1], isIncreasing)
 		}
-		if distance := utils.AbsInt(d); distance < 1 {
-			return false
-		} else if distance > 3 {
+	}
+
+	// At this point the length of the report is at least 3
+	if isStepValid(report[0], report[1], isIncreasing) {
+		return isSafeWithToleration(report[1:], isIncreasing, isFailureTolerated)
+	}
+	if !isFailureTolerated {
+		return false
+	}
+	if isStepValid(report[0], report[2], isIncreasing) {
+		return isSafeWithToleration(report[2:], isIncreasing, false)
+	}
+	return false
+}
+
+// Tail recursive call -- equivalent to isSafeWithToleration(report, isIncreasing, false),
+// kept here because this was originally used to solve task 1
+func isSafe(report Report, isIncreasing bool) bool {
+	if len(report) < 2 {
+		return true
+	}
+	if !isStepValid(report[0], report[1], isIncreasing) {
+		return false
+	}
+	return isSafe(report[1:], isIncreasing)
+}
+
+func isStepValid(a, b Level, isIncreasing bool) bool {
+	diff := b - a
+	if isIncreasing {
+		if diff < 0 {
 			return false
 		}
+	} else {
+		if diff > 0 {
+			return false
+		}
+	}
+	if distance := utils.AbsInt(int(diff)); distance < 1 {
+		return false
+	} else if distance > 3 {
+		return false
 	}
 	return true
 }
