@@ -75,17 +75,8 @@ func parseAndAppendLocationId(list []int, id string) ([]int, error) {
 	return list, nil
 }
 
-func filter(in []string, test func(string) bool) (ret []string) {
-	for _, l := range in {
-		if test(l) {
-			ret = append(ret, l)
-		}
-	}
-	return
-}
-
 func getLocationIds(input string) ([]int, []int, error) {
-	lines := filter(strings.Split(input, "\n"), func(s string) bool {
+	lines := utils.Filter(strings.Split(input, "\n"), func(s string) bool {
 		return s != ""
 	})
 
@@ -114,17 +105,9 @@ func getTotalDistance(locationsA, locationsB []int) int {
 	var distance int = 0
 
 	for i := range locationsA {
-		log.Println(absInt(locationsA[i], locationsB[i]))
-		distance += absInt(locationsA[i], locationsB[i])
+		log.Println(utils.AbsInt(locationsA[i] - locationsB[i]))
+		distance += utils.AbsInt(locationsA[i] - locationsB[i])
 	}
 
 	return distance
-}
-
-func absInt(x, y int) int {
-	if x > y {
-		return x - y
-	} else {
-		return y - x
-	}
 }
