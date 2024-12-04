@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	d := tasks.Day2Task2{}
+	d := tasks.Day3Task1{}
 	answer, err := d.CalculateAnswer()
 	if err != nil {
 		log.Fatalln("Cannot calculate answer", err)
