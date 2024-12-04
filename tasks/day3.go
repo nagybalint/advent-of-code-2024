@@ -8,18 +8,11 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-
-	"github.com/nagybalint/advent-of-code-2024/utils"
 )
 
 type Day3Task1 struct{}
 
-func (Day3Task1) CalculateAnswer() (string, error) {
-	input, err := utils.ReadFileFromRelative("resources/day3.txt")
-	if err != nil {
-		log.Println("Cannot open input file", err)
-		return "", nil
-	}
+func (Day3Task1) CalculateAnswer(input string) (string, error) {
 	re := regexp.MustCompile(`mul\(\d+,\d+\)`)
 	matches := re.FindAllString(input, -1)
 	sum := 0
@@ -40,13 +33,7 @@ type match struct {
 	content string
 }
 
-func (Day3Task2) CalculateAnswer() (string, error) {
-	input, err := utils.ReadFileFromRelative("resources/day3.txt")
-	if err != nil {
-		log.Println("Cannot open input file", err)
-		return "", nil
-	}
-
+func (Day3Task2) CalculateAnswer(input string) (string, error) {
 	mulExpressions, err := findAllWithIndex(`mul\(\d+,\d+\)`, input)
 	if err != nil {
 		log.Println("Error while parsing mul expressions")

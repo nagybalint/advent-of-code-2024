@@ -1,5 +1,5 @@
 package tasks
 
 type Task interface {
-	CalculateAnswer() string
+	CalculateAnswer(input string) (string, error)
 }

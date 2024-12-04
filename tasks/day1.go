@@ -12,12 +12,7 @@ import (
 
 type Day1Task1 struct{}
 
-func (Day1Task1) CalculateAnswer() (string, error) {
-	input, err := utils.ReadFileFromRelative("resources/day1.txt")
-	if err != nil {
-		log.Println("Error reading input")
-		return "", err
-	}
+func (Day1Task1) CalculateAnswer(input string) (string, error) {
 	locationsA, locationsB, err := getLocationIds(input)
 	if err != nil {
 		log.Println("Cannot parse location ids")
@@ -34,12 +29,7 @@ func (Day1Task1) CalculateAnswer() (string, error) {
 
 type Day1Task2 struct{}
 
-func (Day1Task2) CalculateAnswer() (string, error) {
-	input, err := utils.ReadFileFromRelative("resources/day1.txt")
-	if err != nil {
-		log.Println("Error reading input")
-		return "", err
-	}
+func (Day1Task2) CalculateAnswer(input string) (string, error) {
 	locationsA, locationsB, err := getLocationIds(input)
 	if err != nil {
 		log.Println("Cannot parse location ids")

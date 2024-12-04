@@ -13,13 +13,7 @@ type Day2Task2 struct{}
 type Level int
 type Report []Level
 
-func (Day2Task1) CalculateAnswer() (string, error) {
-	input, err := utils.ReadFileFromRelative("resources/day2.txt")
-	if err != nil {
-		log.Println("Error reading input")
-		return "", err
-	}
-
+func (Day2Task1) CalculateAnswer(input string) (string, error) {
 	reports, err := getReports(input)
 	if err != nil {
 		log.Println("Cannot parse all reports", err)
@@ -36,12 +30,7 @@ func (Day2Task1) CalculateAnswer() (string, error) {
 	return strconv.Itoa(safeReports), nil
 }
 
-func (Day2Task2) CalculateAnswer() (string, error) {
-	input, err := utils.ReadFileFromRelative("resources/day2.txt")
-	if err != nil {
-		log.Println("Error reading input")
-		return "", err
-	}
+func (Day2Task2) CalculateAnswer(input string) (string, error) {
 
 	reports, err := getReports(input)
 	if err != nil {
