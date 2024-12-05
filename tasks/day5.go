@@ -3,6 +3,7 @@ package tasks
 import (
 	"fmt"
 	"log"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -47,6 +48,90 @@ func (Day5Task1) CalculateAnswer(input string) (string, error) {
 	return strconv.Itoa(sum), nil
 }
 
+type Day5Task2 struct{}
+
+func (Day5Task2) CalculateAnswer(input string) (string, error) {
+	parts := strings.Split(input, "\n\n")
+	if len(parts) != 2 {
+		return "", fmt.Errorf("Expected the puzzle input to contain 2 parts separated by an empty line")
+	}
+
+	rawRules := utils.Filter(strings.Split(parts[0], "\n"), utils.IsNonEmptyString)
+	rawUpdates := utils.Filter(strings.Split(parts[1], "\n"), utils.IsNonEmptyString)
+
+	rules, err := parseRules(rawRules)
+	if err != nil {
+		log.Println("Error parsing raw rules", err)
+		return "", err
+	}
+	updates, err := parseUpdates(rawUpdates)
+	if err != nil {
+		log.Println("Cannot parse raw updates", err)
+		return "", err
+	}
+
+	log.Println(rules)
+	log.Println(updates)
+
+	incorrectUpdates := utils.Filter(updates, func(u update) bool { return !u.isCorrectFor(rules) })
+	var correctedUpdates []update
+	for _, incorrectUpdate := range incorrectUpdates {
+		filteredRules := rules.filterFor(incorrectUpdate)
+		log.Println("update ", incorrectUpdate, " filtered rules ", filteredRules)
+		correctedUpdate := incorrectUpdate.correct(filteredRules)
+		correctedUpdates = append(correctedUpdates, correctedUpdate)
+	}
+
+	var sum int
+	for _, ud := range correctedUpdates {
+		sum += int(ud.getMiddlePage())
+	}
+
+	return strconv.Itoa(sum), nil
+}
+
+func (ud update) correct(filteredRules rules) update {
+	incorrectUpdatePages := make(pageSet)
+	incorrectUpdatePages.addAll(ud)
+	var correctedUpdate update
+	for len(filteredRules) > 0 {
+		smallestItem := incorrectUpdatePages.filter(func(p page) bool {
+			return !slices.Contains(filteredRules.allAfterPages().pages(), p)
+		})[0]
+		correctedUpdate = append(correctedUpdate, smallestItem)
+		delete(incorrectUpdatePages, smallestItem)
+		delete(filteredRules, smallestItem)
+	}
+	correctedUpdate = append(correctedUpdate, incorrectUpdatePages.pages()[0])
+	return correctedUpdate
+}
+
+func (rs rules) filterFor(ud update) rules {
+	filteredRules := make(rules)
+	for before, afters := range rs {
+		if !slices.Contains(ud, before) {
+			continue
+		}
+		filteredAfters := utils.Filter(afters.pages(), func(p page) bool { return slices.Contains(ud, p) })
+		if len(filteredAfters) == 0 {
+			continue
+		}
+		filteredRules[before] = make(pageSet)
+		for _, after := range filteredAfters {
+			filteredRules[before].add(after)
+		}
+	}
+	return filteredRules
+}
+
+func (rs rules) allAfterPages() pageSet {
+	afterPages := make(pageSet)
+	for _, after := range rs {
+		afterPages.addAllFrom(after)
+	}
+	return afterPages
+}
+
 func (ud update) isCorrectFor(rs rules) bool {
 	pagesSeen := make(pageSet)
 	for _, newPage := range ud {
@@ -74,6 +159,22 @@ func (ps pageSet) pages() []page {
 func (ps pageSet) add(p page) {
 	ps[p] = struct{}{}
 	return
+}
+
+func (ps pageSet) addAllFrom(other pageSet) {
+	for p, _ := range other {
+		ps.add(p)
+	}
+}
+
+func (ps pageSet) addAll(others []page) {
+	for _, p := range others {
+		ps.add(p)
+	}
+}
+
+func (ps pageSet) filter(test func(p page) bool) []page {
+	return utils.Filter(ps.pages(), test)
 }
 
 func (ps pageSet) contains(p page) bool {
