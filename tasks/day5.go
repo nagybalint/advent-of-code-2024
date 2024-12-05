@@ -8,11 +8,12 @@ import (
 	"strings"
 
 	"github.com/nagybalint/advent-of-code-2024/utils"
+	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 type Day5Task1 struct{}
 type page int
-type rules map[page]utils.Set[page]
+type rules map[page]sets.Set[page]
 type update []page
 
 func (Day5Task1) CalculateAnswer(input string) (string, error) {
@@ -94,18 +95,18 @@ func (Day5Task2) CalculateAnswer(input string) (string, error) {
 }
 
 func (ud update) correct(filteredRules rules) update {
-	incorrectUpdatePages := make(utils.Set[page])
-	incorrectUpdatePages.AddAll(ud)
+	incorrectUpdatePages := make(sets.Set[page])
+	incorrectUpdatePages.Insert(ud...)
 	var correctedUpdate update
 	for len(filteredRules) > 0 {
 		smallestItem := filterPageSet(incorrectUpdatePages, func(p page) bool {
-			return !slices.Contains(filteredRules.allAfterPages().ToSlice(), p)
+			return !slices.Contains(filteredRules.allAfterPages().UnsortedList(), p)
 		})[0]
 		correctedUpdate = append(correctedUpdate, smallestItem)
 		delete(incorrectUpdatePages, smallestItem)
 		delete(filteredRules, smallestItem)
 	}
-	correctedUpdate = append(correctedUpdate, incorrectUpdatePages.ToSlice()[0])
+	correctedUpdate = append(correctedUpdate, incorrectUpdatePages.UnsortedList()[0])
 	return correctedUpdate
 }
 
@@ -115,42 +116,42 @@ func (rs rules) filterFor(ud update) rules {
 		if !slices.Contains(ud, before) {
 			continue
 		}
-		filteredAfters := utils.Filter(afters.ToSlice(), func(p page) bool { return slices.Contains(ud, p) })
+		filteredAfters := utils.Filter(afters.UnsortedList(), func(p page) bool { return slices.Contains(ud, p) })
 		if len(filteredAfters) == 0 {
 			continue
 		}
-		filteredRules[before] = make(utils.Set[page])
+		filteredRules[before] = make(sets.Set[page])
 		for _, after := range filteredAfters {
-			filteredRules[before].Add(after)
+			filteredRules[before].Insert(after)
 		}
 	}
 	return filteredRules
 }
 
-func (rs rules) allAfterPages() utils.Set[page] {
-	afterPages := make(utils.Set[page])
+func (rs rules) allAfterPages() sets.Set[page] {
+	afterPages := make(sets.Set[page])
 	for _, after := range rs {
-		afterPages.AddAll(after.ToSlice())
+		afterPages.Insert(after.UnsortedList()...)
 	}
 	return afterPages
 }
 
 func (ud update) isCorrectFor(rs rules) bool {
-	pagesSeen := make(utils.Set[page])
+	pagesSeen := make(sets.Set[page])
 	for _, newPage := range ud {
 		pagesThatShouldComeAfter := rs[newPage]
 		for seen := range pagesSeen {
-			if pagesThatShouldComeAfter.Contains(seen) {
+			if pagesThatShouldComeAfter.Has(seen) {
 				return false
 			}
 		}
-		pagesSeen.Add(newPage)
+		pagesSeen.Insert(newPage)
 	}
 	return true
 }
 
-func filterPageSet(ps utils.Set[page], test func(p page) bool) []page {
-	return utils.Filter(ps.ToSlice(), test)
+func filterPageSet(ps sets.Set[page], test func(p page) bool) []page {
+	return utils.Filter(ps.UnsortedList(), test)
 }
 
 func (ud update) getMiddlePage() page {
@@ -185,9 +186,9 @@ func parseRules(rawRules []string) (rules, error) {
 		}
 		_, ok := rs[before]
 		if !ok {
-			rs[before] = make(utils.Set[page])
+			rs[before] = make(sets.Set[page])
 		}
-		rs[before].Add(after)
+		rs[before].Insert(after)
 	}
 	return rs, nil
 }
