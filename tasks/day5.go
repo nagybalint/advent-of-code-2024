@@ -50,6 +50,10 @@ func (Day5Task1) CalculateAnswer(input string) (string, error) {
 
 type Day5Task2 struct{}
 
+// As there are n*(n-1)/2 sorting rules in the task input
+// (the relation of any 2 numbers appearing in the updates is defined),
+// a simple bubble sort with a custom comparator would work as well
+// Building up a graph based on the ordering rules would also work
 func (Day5Task2) CalculateAnswer(input string) (string, error) {
 	parts := strings.Split(input, "\n\n")
 	if len(parts) != 2 {
