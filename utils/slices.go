@@ -1,12 +1,16 @@
 package utils
 
-func Filter(in []string, test func(string) bool) (ret []string) {
+func Filter[T any](in []T, test func(T) bool) (ret []T) {
 	for _, s := range in {
 		if test(s) {
 			ret = append(ret, s)
 		}
 	}
 	return
+}
+
+func IsNonEmptyString(s string) bool {
+	return s != ""
 }
 
 func SlidingWindow[T any](sl []T, size int) (ret [][]T) {
