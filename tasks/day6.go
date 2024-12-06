@@ -75,13 +75,13 @@ func findGuard(layout labLayout) *guard {
 func (g *guard) move() {
 	switch g.or {
 	case up:
-		g.pos = *g.pos.Step(g.pos.StaysStill, g.pos.GoesUp)
+		g.pos = *g.pos.Step(g.pos.StaysStill, g.pos.YGoesUp)
 	case down:
-		g.pos = *g.pos.Step(g.pos.StaysStill, g.pos.GoesDown)
+		g.pos = *g.pos.Step(g.pos.StaysStill, g.pos.YGoesDown)
 	case left:
-		g.pos = *g.pos.Step(g.pos.GoesLeft, g.pos.StaysStill)
+		g.pos = *g.pos.Step(g.pos.XGoesLeft, g.pos.StaysStill)
 	case right:
-		g.pos = *g.pos.Step(g.pos.GoesRight, g.pos.StaysStill)
+		g.pos = *g.pos.Step(g.pos.XGoesRight, g.pos.StaysStill)
 	default:
 		panic(fmt.Errorf("Invalid orientation"))
 	}

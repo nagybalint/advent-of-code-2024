@@ -26,28 +26,28 @@ func (Day4Task1) CalculateAnswer(input string) (string, error) {
 		for x := range letters[y] {
 			xmasFromPos := 0
 			pos := utils.Pos{X: x, Y: y}
-			if letters.hasXmasFrom(&pos, pos.GoesRight, pos.StaysStill) {
+			if letters.hasXmasFrom(&pos, pos.XGoesRight, pos.StaysStill) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(&pos, pos.GoesLeft, pos.StaysStill) {
+			if letters.hasXmasFrom(&pos, pos.XGoesLeft, pos.StaysStill) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(&pos, pos.StaysStill, pos.GoesDown) {
+			if letters.hasXmasFrom(&pos, pos.StaysStill, pos.YGoesDown) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(&pos, pos.StaysStill, pos.GoesUp) {
+			if letters.hasXmasFrom(&pos, pos.StaysStill, pos.YGoesUp) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(&pos, pos.GoesRight, pos.StaysStill) {
+			if letters.hasXmasFrom(&pos, pos.XGoesRight, pos.StaysStill) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(&pos, pos.GoesRight, pos.StaysStill) {
+			if letters.hasXmasFrom(&pos, pos.XGoesRight, pos.StaysStill) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(&pos, pos.GoesLeft, pos.GoesUp) {
+			if letters.hasXmasFrom(&pos, pos.XGoesLeft, pos.YGoesUp) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(&pos, pos.GoesLeft, pos.GoesDown) {
+			if letters.hasXmasFrom(&pos, pos.XGoesLeft, pos.YGoesDown) {
 				xmasFromPos++
 			}
 			log.Println(pos, " - counted xmases ", xmasFromPos)
@@ -89,10 +89,10 @@ func (l Letters) hasCrossMasAt(pos utils.Pos) bool {
 	if !l.isLetterAt(pos, 'A') {
 		return false
 	}
-	topLeftLetter := l.letterAt(*pos.Step(pos.GoesLeft, pos.GoesUp))
-	topRightLetter := l.letterAt(*pos.Step(pos.GoesRight, pos.GoesUp))
-	bottomLeftLetter := l.letterAt(*pos.Step(pos.GoesLeft, pos.GoesDown))
-	bottomRightLetter := l.letterAt(*pos.Step(pos.GoesRight, pos.GoesDown))
+	topLeftLetter := l.letterAt(*pos.Step(pos.XGoesLeft, pos.YGoesUp))
+	topRightLetter := l.letterAt(*pos.Step(pos.XGoesRight, pos.YGoesUp))
+	bottomLeftLetter := l.letterAt(*pos.Step(pos.XGoesLeft, pos.YGoesDown))
+	bottomRightLetter := l.letterAt(*pos.Step(pos.XGoesRight, pos.YGoesDown))
 	lettersCounts := make(map[rune]int)
 	lettersCounts[topLeftLetter]++
 	lettersCounts[topRightLetter]++
