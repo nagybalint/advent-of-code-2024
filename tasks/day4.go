@@ -10,9 +10,6 @@ import (
 
 type Day4Task1 struct{}
 type Letters [][]rune
-type Pos struct {
-	x, y int
-}
 
 func (Day4Task1) CalculateAnswer(input string) (string, error) {
 	lines := utils.Filter(strings.Split(input, "\n"), func(s string) bool {
@@ -28,29 +25,29 @@ func (Day4Task1) CalculateAnswer(input string) (string, error) {
 	for y := range letters {
 		for x := range letters[y] {
 			xmasFromPos := 0
-			pos := Pos{x, y}
-			if letters.hasXmasFrom(pos, xGoesRight, yStaysStill) {
+			pos := utils.Pos{X: x, Y: y}
+			if letters.hasXmasFrom(&pos, pos.GoesRight, pos.StaysStill) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(pos, xGoesLeft, yStaysStill) {
+			if letters.hasXmasFrom(&pos, pos.GoesLeft, pos.StaysStill) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(pos, xStaysStill, yGoesDown) {
+			if letters.hasXmasFrom(&pos, pos.StaysStill, pos.GoesDown) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(pos, xStaysStill, yGoesUp) {
+			if letters.hasXmasFrom(&pos, pos.StaysStill, pos.GoesUp) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(pos, xGoesRight, yGoesUp) {
+			if letters.hasXmasFrom(&pos, pos.GoesRight, pos.StaysStill) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(pos, xGoesRight, yGoesDown) {
+			if letters.hasXmasFrom(&pos, pos.GoesRight, pos.StaysStill) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(pos, xGoesLeft, yGoesUp) {
+			if letters.hasXmasFrom(&pos, pos.GoesLeft, pos.GoesUp) {
 				xmasFromPos++
 			}
-			if letters.hasXmasFrom(pos, xGoesLeft, yGoesDown) {
+			if letters.hasXmasFrom(&pos, pos.GoesLeft, pos.GoesDown) {
 				xmasFromPos++
 			}
 			log.Println(pos, " - counted xmases ", xmasFromPos)
@@ -59,30 +56,6 @@ func (Day4Task1) CalculateAnswer(input string) (string, error) {
 	}
 
 	return strconv.Itoa(xmasCount), nil
-}
-
-func xGoesRight(x int) int {
-	return x + 1
-}
-
-func xGoesLeft(x int) int {
-	return x - 1
-}
-
-func xStaysStill(x int) int {
-	return x
-}
-
-func yGoesDown(y int) int {
-	return y + 1
-}
-
-func yGoesUp(y int) int {
-	return y - 1
-}
-
-func yStaysStill(y int) int {
-	return y
 }
 
 type Day4Task2 struct{}
@@ -99,7 +72,7 @@ func (Day4Task2) CalculateAnswer(input string) (string, error) {
 	crossmasCount := 0
 	for y := 1; y < len(letters)-1; y++ {
 		for x := 1; x < len(letters[y])-1; x++ {
-			p := Pos{x, y}
+			p := utils.Pos{X: x, Y: y}
 			if letters.hasCrossMasAt(p) {
 				crossmasCount++
 			}
@@ -109,17 +82,17 @@ func (Day4Task2) CalculateAnswer(input string) (string, error) {
 }
 
 // pos will be used to locate the 'A' of the cross mas
-func (l Letters) hasCrossMasAt(pos Pos) bool {
-	if pos.x < 1 || pos.y < 1 || pos.y >= len(l)-1 || pos.x >= len(l[pos.y])-1 {
+func (l Letters) hasCrossMasAt(pos utils.Pos) bool {
+	if pos.X < 1 || pos.Y < 1 || pos.Y >= len(l)-1 || pos.X >= len(l[pos.Y])-1 {
 		return false
 	}
 	if !l.isLetterAt(pos, 'A') {
 		return false
 	}
-	topLeftLetter := l.letterAt(Pos{pos.x - 1, pos.y - 1})
-	topRightLetter := l.letterAt(Pos{pos.x - 1, pos.y + 1})
-	bottomLeftLetter := l.letterAt(Pos{pos.x + 1, pos.y - 1})
-	bottomRightLetter := l.letterAt(Pos{pos.x + 1, pos.y + 1})
+	topLeftLetter := l.letterAt(*pos.Step(pos.GoesLeft, pos.GoesUp))
+	topRightLetter := l.letterAt(*pos.Step(pos.GoesRight, pos.GoesUp))
+	bottomLeftLetter := l.letterAt(*pos.Step(pos.GoesLeft, pos.GoesDown))
+	bottomRightLetter := l.letterAt(*pos.Step(pos.GoesRight, pos.GoesDown))
 	lettersCounts := make(map[rune]int)
 	lettersCounts[topLeftLetter]++
 	lettersCounts[topRightLetter]++
@@ -138,54 +111,49 @@ func (l Letters) hasCrossMasAt(pos Pos) bool {
 	return true
 }
 
-func (l Letters) letterAt(pos Pos) rune {
-	return l[pos.y][pos.x]
+func (l Letters) letterAt(pos utils.Pos) rune {
+	return l[pos.Y][pos.X]
 }
 
-func (l Letters) hasXmasFrom(pos Pos, xStep, yStep func(int) int) bool {
-	if !l.isLetterAt(pos, 'X') {
+func (l Letters) hasXmasFrom(pos *utils.Pos, xStep, yStep func(int) int) bool {
+	if !l.isLetterAt(*pos, 'X') {
 		return false
 	}
 
-	pos.step(xStep, yStep)
-	if !l.isLetterAt(pos, 'M') {
+	pos = pos.Step(xStep, yStep)
+	if !l.isLetterAt(*pos, 'M') {
 		return false
 	}
 
-	pos.step(xStep, yStep)
-	if !l.isLetterAt(pos, 'A') {
+	pos = pos.Step(xStep, yStep)
+	if !l.isLetterAt(*pos, 'A') {
 		return false
 	}
 
-	pos.step(xStep, yStep)
-	if !l.isLetterAt(pos, 'S') {
+	pos = pos.Step(xStep, yStep)
+	if !l.isLetterAt(*pos, 'S') {
 		return false
 	}
 
 	return true
 }
 
-func (l Letters) isLetterAt(pos Pos, letter rune) bool {
-	if pos.x < 0 {
+func (l Letters) isLetterAt(pos utils.Pos, letter rune) bool {
+	if pos.X < 0 {
 		return false
 	}
 
-	if pos.y < 0 {
+	if pos.Y < 0 {
 		return false
 	}
 
-	if pos.y >= len(l) {
+	if pos.Y >= len(l) {
 		return false
 	}
 
-	if pos.x >= len(l[pos.y]) {
+	if pos.X >= len(l[pos.Y]) {
 		return false
 	}
 
-	return l[pos.y][pos.x] == letter
-}
-
-func (p *Pos) step(xStep, yStep func(int) int) {
-	p.x = xStep(p.x)
-	p.y = yStep(p.y)
+	return l[pos.Y][pos.X] == letter
 }

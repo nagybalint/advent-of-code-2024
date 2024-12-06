@@ -11,12 +11,12 @@ import (
 
 func main() {
 	log.SetOutput(io.Discard)
-	input, err := utils.ReadFileFromRelative("resources/day5.txt")
+	input, err := utils.ReadFileFromRelative("resources/day6.txt")
 	if err != nil {
 		log.Println("Error reading input")
 		panic(err)
 	}
-	d := tasks.Day5Task2{}
+	d := tasks.Day6Task1{}
 	answer, err := d.CalculateAnswer(input)
 	if err != nil {
 		log.Fatalln("Cannot calculate answer", err)
