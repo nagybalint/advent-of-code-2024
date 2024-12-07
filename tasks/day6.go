@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/nagybalint/advent-of-code-2024/utils"
+	"k8s.io/apimachinery/pkg/util/sets"
 )
 
 type Day6Task1 struct{}
@@ -25,6 +26,8 @@ const (
 
 type labLayout [][]rune
 
+type visits map[utils.Pos]sets.Set[orientation]
+
 func (Day6Task1) CalculateAnswer(input string) (string, error) {
 	var layout labLayout
 	for _, l := range utils.Filter(strings.Split(input, "\n"), func(s string) bool { return s != "" }) {
@@ -36,26 +39,109 @@ func (Day6Task1) CalculateAnswer(input string) (string, error) {
 	}
 
 	g := findGuard(layout)
+	emptyVisits := make(visits)
+	visits, _ := completePatrol(*g, layout, emptyVisits)
+
+	var visited int
+	for x, _ := range visits {
+		visited += len(visits[x])
+	}
+
+	return strconv.Itoa(visited), nil
+}
+
+type Day6Task2 struct{}
+
+func (Day6Task2) CalculateAnswer(input string) (string, error) {
+	var layout labLayout
+	for _, l := range utils.Filter(strings.Split(input, "\n"), func(s string) bool { return s != "" }) {
+		var line []rune
+		for _, r := range l {
+			line = append(line, r)
+		}
+		layout = append(layout, line)
+	}
+
+	visits := make(visits)
+	newObstacles := make(sets.Set[utils.Pos])
+	g := findGuard(layout)
 	for g.isInBounds(layout) {
 		if layout[g.pos.Y][g.pos.X] == '#' {
 			g.stepBack()
 			g.turn()
 		} else {
-			layout[g.pos.Y][g.pos.X] = 'X'
+			nextField, nextPos, err := g.peek(layout)
+			// Check if we would still be inbounds if we moved
+			if err == nil {
+				_, wasNextPosVisited := visits[nextPos]
+				// If there is an obstacle on the next forward step, or
+				// we already visited the field that we would use to test a new obstacle, don't add the obstacle
+				if nextField != '#' && !wasNextPosVisited {
+					testLayout := layout.clone()
+					testLayout[nextPos.Y][nextPos.X] = '#'
+					_, addingOstacleResultsInLoop := completePatrol(*g, testLayout, visits)
+					if addingOstacleResultsInLoop {
+						newObstacles.Insert(nextPos)
+					}
+				}
+			}
+			visits.add(g.pos, g.or)
 			g.move()
 		}
 	}
 
-	var visited int
-	for _, l := range layout {
-		for _, r := range l {
-			if r == 'X' {
-				visited++
-			}
+	return strconv.Itoa(len(newObstacles)), nil
+}
+
+func completePatrol(g guard, layout labLayout, alreadyVisited visits) (visits visits, hasLoop bool) {
+	visits = alreadyVisited.clone()
+	for {
+		if !g.isInBounds(layout) {
+			return visits, false
+		}
+		if visits.has(g.pos, g.or) {
+			return visits, true
+		}
+		if layout[g.pos.Y][g.pos.X] == '#' {
+			g.stepBack()
+			g.turn()
+		} else {
+			visits.add(g.pos, g.or)
+			g.move()
 		}
 	}
+}
 
-	return strconv.Itoa(visited), nil
+func (g guard) isNextStepObstacleable(layout labLayout, v visits) bool {
+	g.turn()
+	for g.isInBounds(layout) && layout[g.pos.Y][g.pos.X] != '#' {
+		if v.has(g.pos, g.or) {
+			return true
+		}
+	}
+	return false
+}
+
+func (v visits) add(p utils.Pos, o orientation) {
+	if _, ok := v[p]; !ok {
+		v[p] = make(sets.Set[orientation])
+	}
+	v[p].Insert(o)
+}
+
+func (v visits) has(p utils.Pos, o orientation) bool {
+	if _, ok := v[p]; !ok {
+		return false
+	}
+	return v[p].Has(o)
+}
+
+func (v visits) clone() visits {
+	copy := make(visits)
+	for p := range v {
+		copy[p] = v[p].Clone()
+	}
+	return copy
 }
 
 func findGuard(layout labLayout) *guard {
@@ -72,6 +158,18 @@ func findGuard(layout labLayout) *guard {
 	return nil
 }
 
+func (l labLayout) clone() labLayout {
+	var copy labLayout
+	for _, line := range l {
+		var lineCopy []rune
+		for _, l := range line {
+			lineCopy = append(lineCopy, l)
+		}
+		copy = append(copy, lineCopy)
+	}
+	return copy
+}
+
 func (g *guard) move() {
 	switch g.or {
 	case up:
@@ -85,6 +183,17 @@ func (g *guard) move() {
 	default:
 		panic(fmt.Errorf("Invalid orientation"))
 	}
+}
+
+func (g guard) peek(layout labLayout) (elem rune, pos utils.Pos, err error) {
+	g.move()
+	if !g.isInBounds(layout) {
+		err = fmt.Errorf("Guard out of bounds")
+		return
+	}
+	elem = layout[g.pos.Y][g.pos.X]
+	pos = g.pos
+	return
 }
 
 func (g *guard) stepBack() {
@@ -109,17 +218,26 @@ func (g *guard) turn() {
 	}
 }
 
+func (g *guard) turnBack() {
+	g.or = g.or.opposite()
+	g.turn()
+}
+
 func (g *guard) isInBounds(layout labLayout) bool {
-	if g.pos.X < 0 {
+	return layout.isInBounds(g.pos)
+}
+
+func (layout labLayout) isInBounds(p utils.Pos) bool {
+	if p.X < 0 {
 		return false
 	}
-	if g.pos.Y < 0 {
+	if p.Y < 0 {
 		return false
 	}
-	if g.pos.Y >= len(layout) {
+	if p.Y >= len(layout) {
 		return false
 	}
-	if g.pos.X >= len(layout[g.pos.Y]) {
+	if p.X >= len(layout[p.Y]) {
 		return false
 	}
 	return true
