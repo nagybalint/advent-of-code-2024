@@ -20,7 +20,7 @@ func (a antenna) String() string {
 	return fmt.Sprintf("antenna{x: %d, y: %d, typ: %s}", a.p.X, a.p.Y, string(a.typ))
 }
 
-type cityLayout [][]rune
+type cityLayout utils.Plane[rune]
 
 func (Day8Task1) CalculateAnswer(input string) (string, error) {
 	var city cityLayout
@@ -38,10 +38,10 @@ func (Day8Task1) CalculateAnswer(input string) (string, error) {
 		for pair := range utils.Pairs(antennas) {
 			reflection1 := pair[0].p.Reflect(pair[1].p)
 			reflection2 := pair[1].p.Reflect(pair[0].p)
-			if city.isInBounds(reflection1) {
+			if utils.Plane[rune](city).IsInBounds(reflection1) {
 				antinodes.Insert(reflection1)
 			}
-			if city.isInBounds(reflection2) {
+			if utils.Plane[rune](city).IsInBounds(reflection2) {
 				antinodes.Insert(reflection2)
 			}
 		}
@@ -76,7 +76,7 @@ func getAllReflections(city cityLayout, p utils.Point, center utils.Point) (refl
 	reflections = append(reflections, center)
 	for {
 		reflection := p.Reflect(center)
-		if city.isInBounds(reflection) {
+		if utils.Plane[rune](city).IsInBounds(reflection) {
 			reflections = append(reflections, reflection)
 			p = center
 			center = reflection
@@ -85,16 +85,6 @@ func getAllReflections(city cityLayout, p utils.Point, center utils.Point) (refl
 		}
 	}
 	return reflections
-}
-
-func (layout cityLayout) isInBounds(p utils.Point) bool {
-	if p.X < 0 || p.Y < 0 {
-		return false
-	}
-	if p.Y >= len(layout) || p.X >= len(layout[p.Y]) {
-		return false
-	}
-	return true
 }
 
 func (layout cityLayout) findAntennas() (antennas []antenna) {

@@ -9,7 +9,7 @@ import (
 )
 
 type Day4Task1 struct{}
-type Letters [][]rune
+type Letters utils.Plane[rune]
 
 func (Day4Task1) CalculateAnswer(input string) (string, error) {
 	lines := utils.Filter(strings.Split(input, "\n"), func(s string) bool {
@@ -86,13 +86,13 @@ func (l Letters) hasCrossMasAt(pos utils.Point) bool {
 	if pos.X < 1 || pos.Y < 1 || pos.Y >= len(l)-1 || pos.X >= len(l[pos.Y])-1 {
 		return false
 	}
-	if !l.isLetterAt(pos, 'A') {
+	if !utils.Plane[rune](l).TestValueAt(pos, 'A') {
 		return false
 	}
-	topLeftLetter := l.letterAt(*pos.Step(pos.XGoesLeft, pos.YGoesUp))
-	topRightLetter := l.letterAt(*pos.Step(pos.XGoesRight, pos.YGoesUp))
-	bottomLeftLetter := l.letterAt(*pos.Step(pos.XGoesLeft, pos.YGoesDown))
-	bottomRightLetter := l.letterAt(*pos.Step(pos.XGoesRight, pos.YGoesDown))
+	topLeftLetter := utils.Plane[rune](l).ValueAt(*pos.Step(pos.XGoesLeft, pos.YGoesUp))
+	topRightLetter := utils.Plane[rune](l).ValueAt(*pos.Step(pos.XGoesRight, pos.YGoesUp))
+	bottomLeftLetter := utils.Plane[rune](l).ValueAt(*pos.Step(pos.XGoesLeft, pos.YGoesDown))
+	bottomRightLetter := utils.Plane[rune](l).ValueAt(*pos.Step(pos.XGoesRight, pos.YGoesDown))
 	lettersCounts := make(map[rune]int)
 	lettersCounts[topLeftLetter]++
 	lettersCounts[topRightLetter]++
@@ -111,49 +111,25 @@ func (l Letters) hasCrossMasAt(pos utils.Point) bool {
 	return true
 }
 
-func (l Letters) letterAt(pos utils.Point) rune {
-	return l[pos.Y][pos.X]
-}
-
 func (l Letters) hasXmasFrom(pos *utils.Point, xStep, yStep func(int) int) bool {
-	if !l.isLetterAt(*pos, 'X') {
+	if !utils.Plane[rune](l).TestValueAt(*pos, 'X') {
 		return false
 	}
 
 	pos = pos.Step(xStep, yStep)
-	if !l.isLetterAt(*pos, 'M') {
+	if !utils.Plane[rune](l).TestValueAt(*pos, 'M') {
 		return false
 	}
 
 	pos = pos.Step(xStep, yStep)
-	if !l.isLetterAt(*pos, 'A') {
+	if !utils.Plane[rune](l).TestValueAt(*pos, 'A') {
 		return false
 	}
 
 	pos = pos.Step(xStep, yStep)
-	if !l.isLetterAt(*pos, 'S') {
+	if !utils.Plane[rune](l).TestValueAt(*pos, 'S') {
 		return false
 	}
 
 	return true
-}
-
-func (l Letters) isLetterAt(pos utils.Point, letter rune) bool {
-	if pos.X < 0 {
-		return false
-	}
-
-	if pos.Y < 0 {
-		return false
-	}
-
-	if pos.Y >= len(l) {
-		return false
-	}
-
-	if pos.X >= len(l[pos.Y]) {
-		return false
-	}
-
-	return l[pos.Y][pos.X] == letter
 }
