@@ -3,7 +3,6 @@ package tasks
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/nagybalint/advent-of-code-2024/utils"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -27,14 +26,7 @@ const (
 type visits map[utils.Point]sets.Set[orientation]
 
 func (Day6Task1) CalculateAnswer(input string) (string, error) {
-	var layout utils.Plane[rune]
-	for _, l := range utils.Filter(strings.Split(input, "\n"), func(s string) bool { return s != "" }) {
-		var line []rune
-		for _, r := range l {
-			line = append(line, r)
-		}
-		layout = append(layout, line)
-	}
+	layout := utils.BuildPlaneOfRunes(input)
 
 	g := findGuard(layout)
 	emptyVisits := make(visits)
@@ -51,14 +43,7 @@ func (Day6Task1) CalculateAnswer(input string) (string, error) {
 type Day6Task2 struct{}
 
 func (Day6Task2) CalculateAnswer(input string) (string, error) {
-	var layout utils.Plane[rune]
-	for _, l := range utils.Filter(strings.Split(input, "\n"), func(s string) bool { return s != "" }) {
-		var line []rune
-		for _, r := range l {
-			line = append(line, r)
-		}
-		layout = append(layout, line)
-	}
+	layout := utils.BuildPlaneOfRunes(input)
 
 	visits := make(visits)
 	newObstacles := make(sets.Set[utils.Point])

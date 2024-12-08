@@ -3,7 +3,6 @@ package tasks
 import (
 	"log"
 	"strconv"
-	"strings"
 
 	"github.com/nagybalint/advent-of-code-2024/utils"
 )
@@ -12,14 +11,7 @@ type Day4Task1 struct{}
 type Letters utils.Plane[rune]
 
 func (Day4Task1) CalculateAnswer(input string) (string, error) {
-	lines := utils.Filter(strings.Split(input, "\n"), func(s string) bool {
-		return s != ""
-	})
-
-	var letters Letters
-	for _, l := range lines {
-		letters = append(letters, []rune(l))
-	}
+	letters := Letters(utils.BuildPlaneOfRunes(input))
 
 	xmasCount := 0
 	for y := range letters {
@@ -61,14 +53,8 @@ func (Day4Task1) CalculateAnswer(input string) (string, error) {
 type Day4Task2 struct{}
 
 func (Day4Task2) CalculateAnswer(input string) (string, error) {
-	lines := utils.Filter(strings.Split(input, "\n"), func(s string) bool {
-		return s != ""
-	})
+	letters := Letters(utils.BuildPlaneOfRunes(input))
 
-	var letters Letters
-	for _, l := range lines {
-		letters = append(letters, []rune(l))
-	}
 	crossmasCount := 0
 	for y := 1; y < len(letters)-1; y++ {
 		for x := 1; x < len(letters[y])-1; x++ {

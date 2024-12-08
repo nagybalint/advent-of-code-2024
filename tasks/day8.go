@@ -3,7 +3,6 @@ package tasks
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/nagybalint/advent-of-code-2024/utils"
 	"k8s.io/apimachinery/pkg/util/sets"
@@ -23,14 +22,7 @@ func (a antenna) String() string {
 type cityLayout utils.Plane[rune]
 
 func (Day8Task1) CalculateAnswer(input string) (string, error) {
-	var city cityLayout
-	for _, line := range utils.Filter(strings.Split(input, "\n"), utils.IsNonEmptyString) {
-		var cityLine []rune
-		for _, r := range line {
-			cityLine = append(cityLine, r)
-		}
-		city = append(city, cityLine)
-	}
+	city := cityLayout(utils.BuildPlaneOfRunes(input))
 	antennas := city.findAntennas()
 	grouped := utils.GroupBy(antennas, func(a antenna) rune { return a.typ })
 	antinodes := make(sets.Set[utils.Point])
@@ -52,14 +44,7 @@ func (Day8Task1) CalculateAnswer(input string) (string, error) {
 type Day8Task2 struct{}
 
 func (Day8Task2) CalculateAnswer(input string) (string, error) {
-	var city cityLayout
-	for _, line := range utils.Filter(strings.Split(input, "\n"), utils.IsNonEmptyString) {
-		var cityLine []rune
-		for _, r := range line {
-			cityLine = append(cityLine, r)
-		}
-		city = append(city, cityLine)
-	}
+	city := cityLayout(utils.BuildPlaneOfRunes(input))
 	antennas := city.findAntennas()
 	grouped := utils.GroupBy(antennas, func(a antenna) rune { return a.typ })
 	antinodes := make(sets.Set[utils.Point])
