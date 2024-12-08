@@ -27,3 +27,10 @@ func (Pos) YGoesDown(y int) int {
 func (Pos) YGoesUp(y int) int {
 	return y - 1
 }
+
+func (p Pos) Reflect(center Pos) Pos {
+	return Pos{
+		X: p.X + 2*(center.X-p.X),
+		Y: p.Y + 2*(center.Y-p.Y),
+	}
+}
