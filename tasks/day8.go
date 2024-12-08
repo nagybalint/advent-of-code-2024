@@ -12,7 +12,7 @@ import (
 type Day8Task1 struct{}
 
 type antenna struct {
-	p   utils.Pos
+	p   utils.Point
 	typ rune
 }
 
@@ -33,7 +33,7 @@ func (Day8Task1) CalculateAnswer(input string) (string, error) {
 	}
 	antennas := city.findAntennas()
 	grouped := utils.GroupBy(antennas, func(a antenna) rune { return a.typ })
-	antinodes := make(sets.Set[utils.Pos])
+	antinodes := make(sets.Set[utils.Point])
 	for _, antennas := range grouped {
 		for pair := range utils.Pairs(antennas) {
 			reflection1 := pair[0].p.Reflect(pair[1].p)
@@ -62,7 +62,7 @@ func (Day8Task2) CalculateAnswer(input string) (string, error) {
 	}
 	antennas := city.findAntennas()
 	grouped := utils.GroupBy(antennas, func(a antenna) rune { return a.typ })
-	antinodes := make(sets.Set[utils.Pos])
+	antinodes := make(sets.Set[utils.Point])
 	for _, antennas := range grouped {
 		for pair := range utils.Pairs(antennas) {
 			antinodes.Insert(getAllReflections(city, pair[0].p, pair[1].p)...)
@@ -72,7 +72,7 @@ func (Day8Task2) CalculateAnswer(input string) (string, error) {
 	return strconv.Itoa(len(antinodes)), nil
 }
 
-func getAllReflections(city cityLayout, p utils.Pos, center utils.Pos) (reflections []utils.Pos) {
+func getAllReflections(city cityLayout, p utils.Point, center utils.Point) (reflections []utils.Point) {
 	reflections = append(reflections, center)
 	for {
 		reflection := p.Reflect(center)
@@ -87,7 +87,7 @@ func getAllReflections(city cityLayout, p utils.Pos, center utils.Pos) (reflecti
 	return reflections
 }
 
-func (layout cityLayout) isInBounds(p utils.Pos) bool {
+func (layout cityLayout) isInBounds(p utils.Point) bool {
 	if p.X < 0 || p.Y < 0 {
 		return false
 	}
@@ -102,7 +102,7 @@ func (layout cityLayout) findAntennas() (antennas []antenna) {
 		for x, r := range line {
 			if r != '.' {
 				antennas = append(antennas, antenna{
-					p:   utils.Pos{X: x, Y: y},
+					p:   utils.Point{X: x, Y: y},
 					typ: r,
 				})
 			}

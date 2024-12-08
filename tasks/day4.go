@@ -25,7 +25,7 @@ func (Day4Task1) CalculateAnswer(input string) (string, error) {
 	for y := range letters {
 		for x := range letters[y] {
 			xmasFromPos := 0
-			pos := utils.Pos{X: x, Y: y}
+			pos := utils.Point{X: x, Y: y}
 			if letters.hasXmasFrom(&pos, pos.XGoesRight, pos.StaysStill) {
 				xmasFromPos++
 			}
@@ -72,7 +72,7 @@ func (Day4Task2) CalculateAnswer(input string) (string, error) {
 	crossmasCount := 0
 	for y := 1; y < len(letters)-1; y++ {
 		for x := 1; x < len(letters[y])-1; x++ {
-			p := utils.Pos{X: x, Y: y}
+			p := utils.Point{X: x, Y: y}
 			if letters.hasCrossMasAt(p) {
 				crossmasCount++
 			}
@@ -82,7 +82,7 @@ func (Day4Task2) CalculateAnswer(input string) (string, error) {
 }
 
 // pos will be used to locate the 'A' of the cross mas
-func (l Letters) hasCrossMasAt(pos utils.Pos) bool {
+func (l Letters) hasCrossMasAt(pos utils.Point) bool {
 	if pos.X < 1 || pos.Y < 1 || pos.Y >= len(l)-1 || pos.X >= len(l[pos.Y])-1 {
 		return false
 	}
@@ -111,11 +111,11 @@ func (l Letters) hasCrossMasAt(pos utils.Pos) bool {
 	return true
 }
 
-func (l Letters) letterAt(pos utils.Pos) rune {
+func (l Letters) letterAt(pos utils.Point) rune {
 	return l[pos.Y][pos.X]
 }
 
-func (l Letters) hasXmasFrom(pos *utils.Pos, xStep, yStep func(int) int) bool {
+func (l Letters) hasXmasFrom(pos *utils.Point, xStep, yStep func(int) int) bool {
 	if !l.isLetterAt(*pos, 'X') {
 		return false
 	}
@@ -138,7 +138,7 @@ func (l Letters) hasXmasFrom(pos *utils.Pos, xStep, yStep func(int) int) bool {
 	return true
 }
 
-func (l Letters) isLetterAt(pos utils.Pos, letter rune) bool {
+func (l Letters) isLetterAt(pos utils.Point, letter rune) bool {
 	if pos.X < 0 {
 		return false
 	}

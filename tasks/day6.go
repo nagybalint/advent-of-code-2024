@@ -12,7 +12,7 @@ import (
 type Day6Task1 struct{}
 
 type guard struct {
-	pos utils.Pos
+	pos utils.Point
 	or  orientation
 }
 type orientation string
@@ -26,7 +26,7 @@ const (
 
 type labLayout [][]rune
 
-type visits map[utils.Pos]sets.Set[orientation]
+type visits map[utils.Point]sets.Set[orientation]
 
 func (Day6Task1) CalculateAnswer(input string) (string, error) {
 	var layout labLayout
@@ -63,7 +63,7 @@ func (Day6Task2) CalculateAnswer(input string) (string, error) {
 	}
 
 	visits := make(visits)
-	newObstacles := make(sets.Set[utils.Pos])
+	newObstacles := make(sets.Set[utils.Point])
 	g := findGuard(layout)
 	for g.isInBounds(layout) {
 		if layout[g.pos.Y][g.pos.X] == '#' {
@@ -122,14 +122,14 @@ func (g guard) isNextStepObstacleable(layout labLayout, v visits) bool {
 	return false
 }
 
-func (v visits) add(p utils.Pos, o orientation) {
+func (v visits) add(p utils.Point, o orientation) {
 	if _, ok := v[p]; !ok {
 		v[p] = make(sets.Set[orientation])
 	}
 	v[p].Insert(o)
 }
 
-func (v visits) has(p utils.Pos, o orientation) bool {
+func (v visits) has(p utils.Point, o orientation) bool {
 	if _, ok := v[p]; !ok {
 		return false
 	}
@@ -149,7 +149,7 @@ func findGuard(layout labLayout) *guard {
 		for x, r := range line {
 			if r != '#' && r != '.' {
 				return &guard{
-					pos: utils.Pos{X: x, Y: y},
+					pos: utils.Point{X: x, Y: y},
 					or:  orientation(r),
 				}
 			}
@@ -185,7 +185,7 @@ func (g *guard) move() {
 	}
 }
 
-func (g guard) peek(layout labLayout) (elem rune, pos utils.Pos, err error) {
+func (g guard) peek(layout labLayout) (elem rune, pos utils.Point, err error) {
 	g.move()
 	if !g.isInBounds(layout) {
 		err = fmt.Errorf("Guard out of bounds")
@@ -227,7 +227,7 @@ func (g *guard) isInBounds(layout labLayout) bool {
 	return layout.isInBounds(g.pos)
 }
 
-func (layout labLayout) isInBounds(p utils.Pos) bool {
+func (layout labLayout) isInBounds(p utils.Point) bool {
 	if p.X < 0 {
 		return false
 	}
