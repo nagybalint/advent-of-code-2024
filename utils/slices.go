@@ -13,15 +13,22 @@ func IsNonEmptyString(s string) bool {
 	return s != ""
 }
 
-func SlidingWindow[T any](sl []T, size int) (ret [][]T) {
+func SlidingWindow[T any](sl []T, size int) <-chan []T {
+	out := make(chan []T)
 	if len(sl) <= size {
-		ret = append(ret, sl)
-		return
+		go func () {
+			out <- sl
+			close(out)
+		}()
+		return out
 	}
-	for i := 0; i <= len(sl)-size; i++ {
-		ret = append(ret, sl[i:i+size])
-	}
-	return
+	go func () {
+		for i := 0; i <= len(sl)-size; i++ {
+			out <- sl[i:i+size]
+		}
+		close(out)
+	}()
+	return out
 }
 
 func Pairs[T any](sl []T) <-chan []T {
