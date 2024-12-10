@@ -8,11 +8,13 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 )
 
+type Day10 struct {}
+
 type Day10Task1 struct{}
 type topomap utils.Plane[int]
 
 func (d Day10Task1) CalculateAnswer(input string) (string, error) {
-	topo := d.topo(input)
+	topo := Day10(d).topo(input)
 	zeroPoints := utils.Plane[int](topo).FindAllPointsOfValue(0)
 
 	sum := 0
@@ -21,6 +23,35 @@ func (d Day10Task1) CalculateAnswer(input string) (string, error) {
 	}
 
 	return strconv.Itoa(sum), nil
+}
+
+type Day10Task2 struct{}
+
+func (d Day10Task2) CalculateAnswer(input string) (string, error) {
+	topo := Day10(d).topo(input)
+	zeroPoints := utils.Plane[int](topo).FindAllPointsOfValue(0)
+
+	sum := 0
+	for _, zp := range zeroPoints {
+		sum += topo.rating(zp)
+	}
+
+	return strconv.Itoa(sum), nil
+}
+
+func (t topomap) rating(p utils.Point) int {
+	if utils.Plane[int](t).TestValueAt(p, 9) {
+		return 1
+	}
+	cms := t.climbOptionsFrom(p)
+	if len(cms) == 0 {
+		return 0
+	}
+	r := 0
+	for cm := range cms {
+		r += t.rating(cm)
+	}
+	return r
 }
 
 func (t topomap) trailheadScoreOf(p utils.Point) int {
@@ -69,7 +100,7 @@ func (t topomap) climbOptionsFrom(p utils.Point) sets.Set[utils.Point] {
 	return options
 }
 
-func (d Day10Task1) topo(input string) topomap {
+func (d Day10) topo(input string) topomap {
 	var topo utils.Plane[int]
 	for _, line := range utils.BuildPlaneOfRunes(input) {
 		var topoline []int
