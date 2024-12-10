@@ -60,3 +60,14 @@ func (plane Plane[T]) FindAllPointsOfValue(value T) (positions []Point) {
 	}
 	return positions
 }
+
+func MapPlane[T comparable, U comparable](plane Plane[T], mapF func(val T) U) (mapped Plane[U]) {
+	for _, row := range plane {
+		var mappedRow []U
+		for _, v := range row {
+			mappedRow = append(mappedRow, mapF(v))
+		}
+		mapped = append(mapped, mappedRow)
+	}
+	return mapped
+}

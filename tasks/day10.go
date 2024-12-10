@@ -8,7 +8,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 )
 
-type Day10 struct {}
+type Day10 struct{}
 
 type Day10Task1 struct{}
 type topomap utils.Plane[int]
@@ -101,14 +101,8 @@ func (t topomap) climbOptionsFrom(p utils.Point) sets.Set[utils.Point] {
 }
 
 func (d Day10) topo(input string) topomap {
-	var topo utils.Plane[int]
-	for _, line := range utils.BuildPlaneOfRunes(input) {
-		var topoline []int
-		for _, r := range line {
-			h, _ := strconv.Atoi(string(r))
-			topoline = append(topoline, h)
-		}
-		topo = append(topo, topoline)
-	}
-	return topomap(topo)
+	return topomap(utils.MapPlane(utils.BuildPlaneOfRunes(input), func(r rune) int {
+		h, _ := strconv.Atoi(string(r))
+		return h
+	}))
 }
