@@ -86,12 +86,7 @@ func (t topomap) climbableMaximumsFrom(p utils.Point) sets.Set[utils.Point] {
 
 func (t topomap) climbOptionsFrom(p utils.Point) sets.Set[utils.Point] {
 	options := make(sets.Set[utils.Point])
-	for _, opt := range []utils.Point{
-		*p.Step(p.XGoesLeft, p.StaysStill),
-		*p.Step(p.XGoesRight, p.StaysStill),
-		*p.Step(p.StaysStill, p.YGoesDown),
-		*p.Step(p.StaysStill, p.YGoesUp),
-	} {
+	for _, opt := range p.Neighbors() {
 		if utils.Plane[int](t).IsInBounds(opt) &&
 			(utils.Plane[int](t).ValueAt(opt) == utils.Plane[int](t).ValueAt(p)+1) {
 			options.Insert(opt)

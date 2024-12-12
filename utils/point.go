@@ -34,3 +34,12 @@ func (p Point) Reflect(center Point) Point {
 		Y: p.Y + 2*(center.Y-p.Y),
 	}
 }
+
+func (p Point) Neighbors() (neighbors []Point) {
+	return []Point{
+		*p.Step(p.XGoesLeft, p.StaysStill),
+		*p.Step(p.XGoesRight, p.StaysStill),
+		*p.Step(p.StaysStill, p.YGoesDown),
+		*p.Step(p.StaysStill, p.YGoesUp),
+	}
+}
