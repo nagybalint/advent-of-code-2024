@@ -27,5 +27,5 @@ go.work.sum
 # vscode
 .vscode
 
-# test input for checking solution
-resources/test.txt
+# inputs for tasks
+resources
