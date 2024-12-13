@@ -25,7 +25,7 @@ type Day13Task1 struct {
 }
 type Day13Task2 struct{}
 
-type buttomEquasions struct {
+type buttonEquasions struct {
 	o, p, r, s, k, l int
 }
 
@@ -44,7 +44,7 @@ func (d Day13Task2) CalculateAnswer(input string) (string, error) {
 
 func (d Day13) CalculateAnswer(input string, offset int) (string, error) {
 	raw := strings.Split(input, "\n")
-	var eqs []buttomEquasions
+	var eqs []buttonEquasions
 	for i := 0; i < len(raw); i += 4 {
 		eqs = append(eqs, d.parseEquation(raw[i:i+3], offset))
 	}
@@ -59,14 +59,14 @@ func (d Day13) CalculateAnswer(input string, offset int) (string, error) {
 	return strconv.Itoa(totalTokens), nil
 }
 
-func (d Day13) parseEquation(raw []string, offset int) buttomEquasions {
+func (d Day13) parseEquation(raw []string, offset int) buttonEquasions {
 	o, p := d.parseButton(raw[0])
 	r, s := d.parseButton(raw[1])
 	k, l := d.parsePrize(raw[2])
-	return buttomEquasions{o: o, p: p, r: r, s: s, k: k + offset, l: l + offset}
+	return buttonEquasions{o: o, p: p, r: r, s: s, k: k + offset, l: l + offset}
 }
 
-func (e buttomEquasions) getN() (int, error) {
+func (e buttonEquasions) getN() (int, error) {
 	divisor := e.s*e.o - e.r*e.p
 	dividend := e.s*e.k - e.l*e.r
 	if divisor == 0 {
@@ -79,7 +79,7 @@ func (e buttomEquasions) getN() (int, error) {
 	return n, nil
 }
 
-func (e buttomEquasions) getMByN(n int) int {
+func (e buttonEquasions) getMByN(n int) int {
 	return (e.l - n*e.p) / e.s
 }
 
