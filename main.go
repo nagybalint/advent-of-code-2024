@@ -16,7 +16,7 @@ func main() {
 		log.Println("Error reading input")
 		panic(err)
 	}
-	d := tasks.Day14Task1{}
+	d := tasks.Day14Task2{}
 	answer, err := d.CalculateAnswer(input)
 	if err != nil {
 		log.Fatalln("Cannot calculate answer", err)
