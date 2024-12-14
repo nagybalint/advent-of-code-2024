@@ -1,6 +1,9 @@
 package utils
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
 
 func BuildPlaneOfRunes(input string) (plane Plane[rune]) {
 	for _, line := range Filter(strings.Split(input, "\n"), IsNonEmptyString) {
@@ -11,4 +14,8 @@ func BuildPlaneOfRunes(input string) (plane Plane[rune]) {
 		plane = append(plane, l)
 	}
 	return plane
+}
+func Atoi(s string) int {
+	i, _ := strconv.Atoi(s)
+	return i
 }
