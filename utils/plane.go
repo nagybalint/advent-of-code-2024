@@ -76,6 +76,7 @@ func MapPlane[T comparable, U comparable](plane Plane[T], mapF func(val T) U) (m
 
 func RunePlaneToString(plane Plane[rune]) string {
 	sb := strings.Builder{}
+	sb.WriteString("\n")
 	for _, line := range plane {
 		for _, elem := range line {
 			sb.WriteRune(rune(elem))

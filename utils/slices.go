@@ -16,15 +16,15 @@ func IsNonEmptyString(s string) bool {
 func SlidingWindow[T any](sl []T, size int) <-chan []T {
 	out := make(chan []T)
 	if len(sl) <= size {
-		go func () {
+		go func() {
 			out <- sl
 			close(out)
 		}()
 		return out
 	}
-	go func () {
+	go func() {
 		for i := 0; i <= len(sl)-size; i++ {
-			out <- sl[i:i+size]
+			out <- sl[i : i+size]
 		}
 		close(out)
 	}()
@@ -60,4 +60,13 @@ func GroupBy[V any, K comparable](sl []V, f func(V) K) map[K][]V {
 		grouped[k] = append(grouped[k], elem)
 	}
 	return grouped
+}
+
+func ContainsOnly[T comparable](sl []T, val T) bool {
+	for _, elem := range sl {
+		if elem != val {
+			return false
+		}
+	}
+	return true
 }
