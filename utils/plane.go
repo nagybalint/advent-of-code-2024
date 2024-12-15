@@ -1,5 +1,7 @@
 package utils
 
+import "strings"
+
 type Plane[T comparable] [][]T
 
 func (plane Plane[T]) IsInBounds(p Point) bool {
@@ -70,4 +72,15 @@ func MapPlane[T comparable, U comparable](plane Plane[T], mapF func(val T) U) (m
 		mapped = append(mapped, mappedRow)
 	}
 	return mapped
+}
+
+func RunePlaneToString(plane Plane[rune]) string {
+	sb := strings.Builder{}
+	for _, line := range plane {
+		for _, elem := range line {
+			sb.WriteRune(rune(elem))
+		}
+		sb.WriteString("\n")
+	}
+	return sb.String()
 }
