@@ -1,7 +1,6 @@
 package tasks
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/nagybalint/advent-of-code-2024/utils"
@@ -10,20 +9,7 @@ import (
 
 type Day6Task1 struct{}
 
-type guard struct {
-	pos utils.Point
-	or  orientation
-}
-type orientation string
-
-const (
-	up    orientation = "^"
-	down  orientation = "v"
-	left  orientation = "<"
-	right orientation = ">"
-)
-
-type visits map[utils.Point]sets.Set[orientation]
+type visits map[utils.Point]sets.Set[utils.Direction]
 
 func (Day6Task1) CalculateAnswer(input string) (string, error) {
 	layout := utils.BuildPlaneOfRunes(input)
@@ -48,12 +34,12 @@ func (Day6Task2) CalculateAnswer(input string) (string, error) {
 	visits := make(visits)
 	newObstacles := make(sets.Set[utils.Point])
 	g := findGuard(layout)
-	for layout.IsInBounds(g.pos) {
-		if layout[g.pos.Y][g.pos.X] == '#' {
-			g.stepBack()
-			g.turn()
+	for layout.IsInBounds(g.Pos) {
+		if layout[g.Pos.Y][g.Pos.X] == '#' {
+			g.StepBack()
+			g.TurnRight()
 		} else {
-			nextField, nextPos, err := g.peek(layout)
+			nextField, nextPos, err := g.Peek(layout)
 			// Check if we would still be inbounds if we moved
 			if err == nil {
 				_, wasNextPosVisited := visits[nextPos]
@@ -68,51 +54,41 @@ func (Day6Task2) CalculateAnswer(input string) (string, error) {
 					}
 				}
 			}
-			visits.add(g.pos, g.or)
-			g.move()
+			visits.add(g.Pos, g.Dir)
+			g.Move()
 		}
 	}
 
 	return strconv.Itoa(len(newObstacles)), nil
 }
 
-func completePatrol(g guard, layout utils.Plane[rune], alreadyVisited visits) (visits visits, hasLoop bool) {
+func completePatrol(g utils.Walker, layout utils.Plane[rune], alreadyVisited visits) (visits visits, hasLoop bool) {
 	visits = alreadyVisited.clone()
 	for {
-		if !layout.IsInBounds(g.pos) {
+		if !layout.IsInBounds(g.Pos) {
 			return visits, false
 		}
-		if visits.has(g.pos, g.or) {
+		if visits.has(g.Pos, g.Dir) {
 			return visits, true
 		}
-		if layout.TestValueAt(g.pos, '#') {
-			g.stepBack()
-			g.turn()
+		if layout.TestValueAt(g.Pos, '#') {
+			g.StepBack()
+			g.TurnRight()
 		} else {
-			visits.add(g.pos, g.or)
-			g.move()
+			visits.add(g.Pos, g.Dir)
+			g.Move()
 		}
 	}
 }
 
-func (g guard) isNextStepObstacleable(layout utils.Plane[rune], v visits) bool {
-	g.turn()
-	for layout.IsInBounds(g.pos) && !layout.TestValueAt(g.pos, '#') {
-		if v.has(g.pos, g.or) {
-			return true
-		}
-	}
-	return false
-}
-
-func (v visits) add(p utils.Point, o orientation) {
+func (v visits) add(p utils.Point, o utils.Direction) {
 	if _, ok := v[p]; !ok {
-		v[p] = make(sets.Set[orientation])
+		v[p] = make(sets.Set[utils.Direction])
 	}
 	v[p].Insert(o)
 }
 
-func (v visits) has(p utils.Point, o orientation) bool {
+func (v visits) has(p utils.Point, o utils.Direction) bool {
 	if _, ok := v[p]; !ok {
 		return false
 	}
@@ -127,84 +103,16 @@ func (v visits) clone() visits {
 	return copy
 }
 
-func findGuard(layout utils.Plane[rune]) *guard {
+func findGuard(layout utils.Plane[rune]) *utils.Walker {
 	for y, line := range layout {
 		for x, r := range line {
 			if r != '#' && r != '.' {
-				return &guard{
-					pos: utils.Point{X: x, Y: y},
-					or:  orientation(r),
+				return &utils.Walker{
+					Pos: utils.Point{X: x, Y: y},
+					Dir: utils.Direction(r),
 				}
 			}
 		}
 	}
 	return nil
-}
-
-func (g *guard) move() {
-	switch g.or {
-	case up:
-		g.pos = *g.pos.Step(g.pos.StaysStill, g.pos.YGoesUp)
-	case down:
-		g.pos = *g.pos.Step(g.pos.StaysStill, g.pos.YGoesDown)
-	case left:
-		g.pos = *g.pos.Step(g.pos.XGoesLeft, g.pos.StaysStill)
-	case right:
-		g.pos = *g.pos.Step(g.pos.XGoesRight, g.pos.StaysStill)
-	default:
-		panic(fmt.Errorf("Invalid orientation"))
-	}
-}
-
-func (g guard) peek(layout utils.Plane[rune]) (elem rune, pos utils.Point, err error) {
-	g.move()
-	if !layout.IsInBounds(g.pos) {
-		err = fmt.Errorf("Guard out of bounds")
-		return
-	}
-	elem = layout.ValueAt(g.pos)
-	pos = g.pos
-	return
-}
-
-func (g *guard) stepBack() {
-	g.or = g.or.opposite()
-	g.move()
-	g.or = g.or.opposite()
-}
-
-func (g *guard) turn() {
-	o := &g.or
-	switch *o {
-	case up:
-		*o = right
-	case down:
-		*o = left
-	case left:
-		*o = up
-	case right:
-		*o = down
-	default:
-		panic(fmt.Errorf("Invalid orientation"))
-	}
-}
-
-func (g *guard) turnBack() {
-	g.or = g.or.opposite()
-	g.turn()
-}
-
-func (o orientation) opposite() orientation {
-	switch o {
-	case up:
-		return down
-	case down:
-		return up
-	case left:
-		return right
-	case right:
-		return left
-	default:
-		panic(fmt.Errorf("Invalid orientation"))
-	}
 }
